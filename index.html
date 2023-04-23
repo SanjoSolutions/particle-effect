@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Particle effect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <script>
+      let mousePosition = { x: null, y: null }
+
+      document.addEventListener("mousemove", function (event) {
+        mousePosition = {
+          x: event.clientX,
+          y: event.clientY,
+        }
+      })
+
+      class Particle {
+        constructor(startPosition) {
+          this.position = startPosition
+          this.direction = randomFloor(0, 2 * Math.PI)
+          this.distanceToTravel = randomFloor(50, 100)
+          this.distanceTravelled = 0
+          this.speed = 1
+          this.color = `hsl(0deg 100% 50%)`
+          this.element = document.createElement("div")
+          this.element.style.width = "2px"
+          this.element.style.height = "2px"
+          this.element.style.backgroundColor = this.color
+          this.element.style.position = "absolute"
+          this.element.style.left = this.position.x + "px"
+          this.element.style.top = this.position.y + "px"
+          document.body.appendChild(this.element)
+        }
+
+        update() {
+          if (this.distanceTravelled >= this.distanceToTravel) {
+            this.element.remove()
+          } else {
+            this.position = {
+              x: this.position.x + this.speed * Math.cos(this.direction),
+              y: this.position.y + this.speed * Math.sin(this.direction),
+            }
+            this.element.style.left = this.position.x + "px"
+            this.element.style.top = this.position.y + "px"
+            this.distanceTravelled += this.speed
+            this.element.style.opacity =
+              1 - (this.distanceTravelled / this.distanceToTravel)
+          }
+        }
+      }
+
+      const particles = []
+
+      setInterval(function () {
+        if (mousePosition.x && mousePosition.y) {
+          const particle = new Particle(mousePosition)
+          particles.push(particle)
+        }
+      }, 250)
+
+      function update() {
+        particles.forEach(particle => particle.update())
+      }
+
+      function updateAndScheduleNextUpdate() {
+        update()
+        scheduleNextUpdate()
+      }
+
+      function scheduleNextUpdate() {
+        requestAnimationFrame(updateAndScheduleNextUpdate)
+      }
+
+      function randomFloor(from, to) {
+        return from + Math.random() * (to - from)
+      }
+
+      updateAndScheduleNextUpdate()
+    </script>
+  </body>
+</html>
